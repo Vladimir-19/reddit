@@ -1,31 +1,49 @@
-# reddit
+# Reddit
 
-## Project setup
+## Installation
 
-```
+### 1. Install Dependencies
+
+Run the following command to install dependencies for both root and backend folders:
+
+```bash
 npm install
-frontend: npm run serve
-backend: ca backen -> run: node server.js
 ```
 
-### Compiles and hot-reloads for development
+### 2. Frontend Setup
 
-```
+To run the frontend, use the following command:
+
+```bash
 npm run serve
 ```
 
-### Compiles and minifies for production
+Make sure the frontend is running on http://localhost:8084/.
 
-```
-npm run build
-```
+### 3. Backend Setup
 
-### Lints and fixes files
+To start the backend, navigate to the backend directory and run:
 
-```
-npm run lint
+```bash
+node server.js
 ```
 
-### Customize configuration
+The backend should be running on http://localhost:3031/.
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## Features
+
+### Admin Access:
+
+- Admin can see all comments, likes, and attached images.
+  ![Alt text](./public/home%20page.jpg)
+- Admin has the ability to update or delete comment text.
+  ![Alt text](./public/edit.jpg)
+- Admin can create new comments.
+  ![Alt text](./public/add.jpg)
+
+### Tech Stack
+
+- Frontend: Vue 3, Vuetify 3
+- Backend: Node.js, Express.js
+- Database: SQL
+- Deployment: Heroku
