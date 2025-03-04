@@ -1,13 +1,13 @@
 <template>
   <v-app>
     <v-main>
-      <HelloWorld />
+      <HomePage />
     </v-main>
     <CommentsList />
   </v-app>
 </template>
 
 <script setup>
-import HelloWorld from "./components/HelloWorld.vue";
+import HomePage from "./components/HomePage.vue";
 import CommentsList from "./components/CommentsList.vue";
 </script>

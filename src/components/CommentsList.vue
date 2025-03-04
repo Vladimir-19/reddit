@@ -73,10 +73,13 @@ const editedComment = ref({
 // Fetch comments when component is mounted
 onMounted(async () => {
   try {
-    const response = await axios.get("/api/comments/1"); // Fetch comments for post_id 1
-    comments.value = response.data;
+    const response = await axios.get(
+      "https://reddit-sql-59a14ccacaa9.herokuapp.com/api/comments/"
+    ); // Fetch comments for post_id 1
+    console.log("!!!!", response);
+    // comments.value = response.data;
   } catch (err) {
-    console.error(err);
+    console.error("?err", err);
   }
 });
 
@@ -128,4 +131,8 @@ const deleteComment = async (commentId) => {
     console.error(err);
   }
 };
+
+onMounted(() => {
+  console.log("CommentsList component mounted");
+});
 </script>
