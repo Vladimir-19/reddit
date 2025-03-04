@@ -1,21 +1,59 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col v-for="comment in comments" :key="comment.id" cols="12" md="6">
-        <v-card>
-          <v-card-title>{{ comment.author }}</v-card-title>
-          <v-card-subtitle>{{
-            new Date(comment.created_at).toLocaleString()
-          }}</v-card-subtitle>
-          <v-card-text>
-            <div>{{ comment.text }}</div>
-            <div v-if="comment.image_url">
-              <v-img :src="comment.image_url" />
+    <!-- Posts Section -->
+    <v-row class="justify-center">
+      <v-col v-for="comment in comments" :key="comment.id" cols="12" md="10">
+        <v-card outlined rounded="lg">
+          <v-card-subtitle>
+            <a :href="'/'" class="author-link" style="color: black">
+              {{ comment.author }}
+            </a>
+            {{
+              new Date(comment.date).toLocaleString("en-US", {
+                month: "numeric",
+                day: "numeric",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true, // format (AM/PM)
+              })
+            }}
+          </v-card-subtitle>
+
+          <v-card-text class="comment-text">
+            <h2>{{ comment.text }}</h2>
+
+            <div v-if="comment.image">
+              <v-img :src="comment.image" />
             </div>
           </v-card-text>
-          <v-card-actions>
-            <v-btn @click="editComment(comment)">Edit</v-btn>
-            <v-btn @click="deleteComment(comment.id)">Delete</v-btn>
+
+          <v-card-actions class="d-flex justify-space-between">
+            <div>
+              <v-btn
+                icon="mdi-pencil-outline"
+                @click="editComment(comment.id)"
+              ></v-btn>
+              <v-btn
+                icon="mdi-delete-outline"
+                @click="deleteComment(comment.id)"
+              ></v-btn>
+            </div>
+            <div>
+              <v-btn
+                :color="comment.likes > 0 ? 'blue' : 'gray'"
+                @click="toggleLike(comment)"
+                :icon="true"
+                rounded
+              >
+                <v-icon>{{
+                  comment.likes > 0 ? "mdi-heart" : "mdi-heart-outline"
+                }}</v-icon>
+              </v-btn>
+              <span :style="{ color: comment.likes > 0 ? 'blue' : 'black' }">
+                {{ comment.likes }}
+              </span>
+            </div>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -60,24 +98,29 @@ const comments = ref([]);
 const editDialog = ref(false);
 const addDialog = ref(false);
 const newComment = ref({
-  post_id: 1, // Hardcoded post ID for now
+  id: Math.floor(Math.random() * 1000) + 1, // Hardcoded post ID for now
   text: "",
   author: "Admin",
-  image_url: "",
+  image: "",
+  likes: 0, // Initialize likes property
 });
 const editedComment = ref({
   id: null,
   text: "",
 });
 
+function toggleLike(comment) {
+  comment.likes = comment.likes > 0 ? 0 : 1; // Toggle between liked (1) and unliked (0)
+}
+
 // Fetch comments when component is mounted
 onMounted(async () => {
   try {
-    const response = await axios.get(
-      "https://reddit-sql-59a14ccacaa9.herokuapp.com/api/comments/"
-    ); // Fetch comments for post_id 1
-    console.log("!!!!", response);
-    // comments.value = response.data;
+    const response = await axios.get("http://localhost:3031/api/comments"); // Fetch comments for post_id 1
+    comments.value = response.data.map((comment) => ({
+      ...comment,
+      likes: comment.likes || 0, // Ensure likes property is available
+    }));
   } catch (err) {
     console.error("?err", err);
   }
@@ -90,7 +133,10 @@ const addComment = () => {
 
 const submitNewComment = async () => {
   try {
-    const response = await axios.post("/api/comments", newComment.value);
+    const response = await axios.post(
+      "http://localhost:3031/api/comments",
+      newComment.value
+    );
     comments.value.push(response.data);
     addDialog.value = false;
   } catch (err) {
@@ -98,15 +144,15 @@ const submitNewComment = async () => {
   }
 };
 
-const editComment = (comment) => {
-  editedComment.value = { ...comment };
+const editComment = (commentId) => {
+  editedComment.value = { ...comments.value.find((c) => c.id === commentId) };
   editDialog.value = true;
 };
 
 const saveComment = async () => {
   try {
     const response = await axios.put(
-      `/api/comments/${editedComment.value.id}`,
+      `http://localhost:3031/api/comments/${editedComment.value.id}`,
       {
         text: editedComment.value.text,
       }
@@ -123,7 +169,7 @@ const saveComment = async () => {
 
 const deleteComment = async (commentId) => {
   try {
-    await axios.delete(`/api/comments/${commentId}`);
+    await axios.delete(`http://localhost:3031/api/comments/${commentId}`);
     comments.value = comments.value.filter(
       (comment) => comment.id !== commentId
     );
@@ -131,8 +177,4 @@ const deleteComment = async (commentId) => {
     console.error(err);
   }
 };
-
-onMounted(() => {
-  console.log("CommentsList component mounted");
-});
 </script>
