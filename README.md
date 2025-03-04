@@ -22,7 +22,8 @@ Make sure the frontend is running on http://localhost:8084/.
 
 ### 3. Backend Setup
 
-To start the backend, navigate to the backend directory and run:
+- Add .env file into the ./backend and add `DATABASE_URL=`
+- To start the backend, navigate to the backend directory and run:
 
 ```bash
 node server.js
