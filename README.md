@@ -5,6 +5,7 @@
 ```
 npm install
 frontend: npm run serve
+backend: ca backen -> run: node server.js
 ```
 
 ### Compiles and hot-reloads for development

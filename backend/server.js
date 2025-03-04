@@ -5,7 +5,7 @@ const { Client } = require("pg");
 const bodyParser = require("body-parser");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,6 +23,37 @@ const client = new Client({
   },
 });
 client.connect();
+// client.query(
+//   `
+//   CREATE TABLE IF NOT EXISTS comments (
+//     id SERIAL PRIMARY KEY,
+//     author VARCHAR(255),
+//     text TEXT,
+//     date TIMESTAMPTZ,
+//     likes INT,
+//     image VARCHAR(255)
+//   );
+// `,
+//   (err, res) => {
+//     if (err) {
+//       console.error("Error creating table:", err);
+//     } else {
+//       console.log("Table created or already exists");
+//     }
+//   }
+// );
+
+app.get("/api/comments", async (req, res) => {
+  console.log("EYE");
+  try {
+    const result = await client.query("SELECT * FROM public.comments");
+    console.log("???", result);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("!!!!", err);
+    res.status(500).send("Server error");
+  }
+});
 
 // GET all comments for a post
 app.get("/api/comments/:postId", async (req, res) => {
@@ -31,6 +62,7 @@ app.get("/api/comments/:postId", async (req, res) => {
       "SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at DESC",
       [req.params.postId]
     );
+    console.log("YEYEEYY", result);
     res.json(result.rows);
   } catch (err) {
     console.error(err);
