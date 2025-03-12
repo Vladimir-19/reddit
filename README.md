@@ -35,7 +35,7 @@ The backend should be running on http://localhost:3031/.
 
 ### Admin Access:
 
-- Admin can see all comments, likes, and attached images.
+- Admin can see all comments and their children, likes, and attached images.
   ![Alt text](./public/home%20page.jpg)
 - Admin has the ability to update or delete comment text.
   ![Alt text](./public/edit.jpg)
