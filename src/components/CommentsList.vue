@@ -1,12 +1,16 @@
 <template>
   <v-container>
-    <!-- Posts Section -->
     <v-row class="justify-center">
       <v-col v-for="comment in comments" :key="comment.id" cols="12" md="10">
         <v-card outlined rounded="lg">
           <v-card-subtitle>
             <a :href="'/'" class="author-link" style="color: black">
               {{ comment.author }}
+              {{
+                comment.parent
+                  ? "Replying to " + comment.parent
+                  : "Main Comment"
+              }}
             </a>
             {{
               new Date(comment.date).toLocaleString("en-US", {
@@ -56,9 +60,73 @@
             </div>
           </v-card-actions>
         </v-card>
+        <!-- Render Replies Recursively -->
+        <v-row v-if="comment.replies.length > 0" class="ml-5">
+          <v-col
+            v-for="reply in comment.replies"
+            :key="reply.id"
+            cols="12"
+            md="10"
+          >
+            <v-card outlined rounded="lg">
+              <v-card-subtitle>
+                <a :href="'/'" class="author-link" style="color: black">
+                  {{ reply.author }}
+                </a>
+                {{
+                  new Date(reply.date).toLocaleString("en-US", {
+                    month: "numeric",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true, // format (AM/PM)
+                  })
+                }}
+              </v-card-subtitle>
+
+              <v-card-text class="comment-text">
+                <h2>{{ reply.text }}</h2>
+
+                <div v-if="reply.image">
+                  <v-img :src="reply.image" />
+                </div>
+              </v-card-text>
+
+              <v-card-actions class="d-flex justify-space-between">
+                <div>
+                  <v-btn
+                    icon="mdi-pencil-outline"
+                    @click="editComment(reply.id)"
+                  ></v-btn>
+                  <v-btn
+                    icon="mdi-delete-outline"
+                    @click="deleteComment(reply.id)"
+                  ></v-btn>
+                </div>
+                <div>
+                  <v-btn
+                    :color="reply.likes > 0 ? 'blue' : 'gray'"
+                    @click="toggleLike(reply)"
+                    :icon="true"
+                    rounded
+                  >
+                    <v-icon>{{
+                      reply.likes > 0 ? "mdi-heart" : "mdi-heart-outline"
+                    }}</v-icon>
+                  </v-btn>
+                  <span :style="{ color: reply.likes > 0 ? 'blue' : 'black' }">
+                    {{ reply.likes }}
+                  </span>
+                </div>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
 
+    <!-- Edit and Add Dialogs -->
     <v-dialog v-model="editDialog" max-width="500px">
       <v-card>
         <v-card-title>Edit Comment</v-card-title>
@@ -93,7 +161,6 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-// State variables
 const comments = ref([]);
 const editDialog = ref(false);
 const addDialog = ref(false);
@@ -110,23 +177,37 @@ const editedComment = ref({
 });
 
 function toggleLike(comment) {
-  comment.likes = comment.likes > 0 ? 0 : 1; // Toggle between liked (1) and unliked (0)
+  comment.likes = comment.likes > 0 ? 0 : 1;
 }
 
-// Fetch comments when component is mounted
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:3031/api/comments"); // Fetch comments for post_id 1
-    comments.value = response.data.map((comment) => ({
+    const response = await axios.get("http://localhost:3031/api/comments");
+    const allComments = response.data.map((comment) => ({
       ...comment,
-      likes: comment.likes || 0, // Ensure likes property is available
+      likes: comment.likes || 0,
     }));
+
+    const commentsMap = allComments.reduce((map, comment) => {
+      map[comment.id] = { ...comment, replies: [] };
+      return map;
+    }, {});
+
+    const commentsWithReplies = [];
+    allComments.forEach((comment) => {
+      if (comment.parent) {
+        commentsMap[comment.parent].replies.push(comment);
+      } else {
+        commentsWithReplies.push(commentsMap[comment.id]);
+      }
+    });
+
+    comments.value = commentsWithReplies;
   } catch (err) {
     console.error("?err", err);
   }
 });
 
-// Methods
 const addComment = () => {
   addDialog.value = true;
 };

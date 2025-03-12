@@ -40,14 +40,15 @@ client.connect();
 // reddit-sql::DATABASE(>     author VARCHAR(255)
 // reddit-sql::DATABASE(> );
 //   `
-//   CREATE TABLE IF NOT EXISTS comments (
-//     id SERIAL PRIMARY KEY,
-//     author VARCHAR(255),
-//     text TEXT,
-//     date TIMESTAMPTZ,
-//     likes INT,
-//     image VARCHAR(255)
-//   );
+// CREATE TABLE IF NOT EXISTS comments (
+//   id SERIAL PRIMARY KEY,
+//   parent INT,
+//   author VARCHAR(255),
+//   text TEXT,
+//   date TIMESTAMPTZ,
+//   likes INT,
+//   image VARCHAR(255)
+// );
 // `,
 //   (err, res) => {
 //     if (err) {
@@ -63,6 +64,7 @@ app.get("/api/comments", async (req, res) => {
   try {
     const result = await client.query("SELECT * FROM public.comments");
     res.json(result.rows);
+    // console.log({ results });
   } catch (err) {
     console.error("Error fetching comments:", err);
     res.status(500).send("Server error");
